@@ -4,16 +4,15 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Proveedore extends Model
+class Cliente extends Model
 {
-
     public function persona()
     {
         return $this->belongsTo(Persona::class);
     }
 
-    public function compras()
+    public function ventas()
     {
-        return $this->hasMany(Compra::class);
+        return $this->hasMany(Ventas::class);
     }
 }

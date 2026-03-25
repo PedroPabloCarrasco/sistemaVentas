@@ -16,12 +16,12 @@ return new class extends Migration
             $table->dateTime('fecha_hora');
             $table->decimal('impuesto', 8, 2)->unsigned();
             $table->string('num_comprobante', 255);
-            $table->integer('total', 8, 2)->unsigned();
+            $table->decimal('total', 8, 2)->unsigned(); // CORREGIDO
 
             $table->tinyInteger('estado')->default(1); // 1: activo, 0: inactivo
 
-            $table->foreignId('comprobante_id')->constrained('comprobantes')->onDelete('set null');
-            $table->foreignId('proveedore_id')->constrained('proveedores')->onDelete('set null');
+            $table->foreignId('comprobante_id')->nullable()->constrained('comprobantes')->onDelete('set null');
+            $table->foreignId('proveedore_id')->nullable()->constrained('proveedores')->onDelete('set null');
             $table->timestamps();
         });
     }
