@@ -10,6 +10,12 @@ Route::get('/login', function () {
     return view('auth.login');
 });
 
+
+Route::get('/panel', function () {
+    return view('panel.index');
+})->name('panel');
+
+
 Route::get('/401', function () {
     return view('pages.401');
 });
