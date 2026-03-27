@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\storeCategoriaRequest;
+use App\Models\Caracteristicas;
 use Illuminate\Http\Request;
 use App\Models\Categoria;
+use Illuminate\Support\Facades\DB;
 
 class CategoriaController extends Controller
 {
@@ -27,19 +30,17 @@ class CategoriaController extends Controller
     /**
      * Guardar nueva categoría
      */
-    public function store(Request $request)
+    public function store(storeCategoriaRequest $request)
     {
-        // Validación
-        $request->validate([
-            'nombre' => 'required|string|max:255',
-            'descripcion' => 'nullable|string'
-        ]);
-
-        // Guardar en BD
-        Categoria::create([
-            'nombre' => $request->nombre,
-            'descripcion' => $request->descripcion
-        ]);
+        try {
+            DB::beginTransaction();
+            Categoria::create($request->validated());
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->route('categorias.index')
+                ->with('error', 'Error al crear categoría: ' . $e->getMessage());
+        }
 
         return redirect()->route('categorias.index')
             ->with('success', 'Categoría creada correctamente');
