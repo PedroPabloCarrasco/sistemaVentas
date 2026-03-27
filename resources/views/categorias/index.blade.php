@@ -15,8 +15,8 @@
 
         </ol>
 
-        <a href="">
-            <button class="btn btn-primary mb-2"><i class="fa-solid fa-plus"></i> Agregar nueva categoría</button>
+        <a href="{{ route('categorias.create') }}" class="btn btn-primary mb-2">
+            <i class="fa-solid fa-plus"></i> Agregar nueva categoría
         </a>
 
         <div class="card mb-4">

@@ -17,6 +17,9 @@ Route::get('/panel', function () {
     return view('panel.index');
 })->name('panel');
 
+
+
+
 Route::resource('categorias', categoriaController::class);
 
 

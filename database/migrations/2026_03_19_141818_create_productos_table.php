@@ -6,9 +6,6 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('productos', function (Blueprint $table) {
@@ -19,15 +16,16 @@ return new class extends Migration
             $table->string('descripcion', 255)->nullable();
             $table->date('fecha_vencimiento')->nullable();
             $table->string('img_path', 255)->nullable();
-            $table->tinyInteger('estado')->default(1); // 1: activo, 0: inactivo
-            $table->foreignId('presentacione_id')->constrained('presentaciones')->onDelete()->cascade();
+            $table->tinyInteger('estado')->default(1);
+
+            $table->foreignId('presentacion_id')
+                ->constrained('presentaciones')
+                ->onDelete('cascade');
+
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('productos');

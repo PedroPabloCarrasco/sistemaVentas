@@ -16,9 +16,13 @@ return new class extends Migration
             $table->dateTime('fecha_hora');
             $table->decimal('impuesto', 8, 2)->unsigned();
             $table->string('num_comprobante', 255);
-            $table->integer('total', 8, 2, true)->unsigned();
-            $table->tinyInteger('estado')->default(1); // 1: activo, 0: inactivo
-            $table->foreignId('cliente_id')->nullable()->constrained('comprobantes')->onDelete('set null');
+            $table->decimal('total', 10, 2);
+            $table->tinyInteger('estado')->default(1);
+
+            $table->foreignId('cliente_id')
+                ->nullable()
+                ->constrained('comprobantes')
+                ->onDelete('set null');
 
             $table->timestamps();
         });

@@ -7,19 +7,21 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     /**
-     * Run the migrations.
+     * Crear tabla categorias
      */
     public function up(): void
     {
         Schema::create('categorias', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('caracteristica_id')->unique()->constrained('caracteristicas')->onDelete('cascade');
+            $table->string('nombre', 100);
+            $table->text('descripcion')->nullable();
+            $table->tinyInteger('estado')->default(1); // opcional (activo/inactivo)
             $table->timestamps();
         });
     }
 
     /**
-     * Reverse the migrations.
+     * Eliminar tabla categorias
      */
     public function down(): void
     {
