@@ -59,11 +59,9 @@ class ProductoController extends Controller
     /**
      * Formulario de edición
      */
-    public function edit(string $id)
+    public function edit(Producto $producto)
     {
-        $producto = Producto::findOrFail($id);
         $categorias = Categoria::all();
-
         return view('productos.edit', compact('producto', 'categorias'));
     }
 
