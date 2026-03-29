@@ -13,16 +13,15 @@ return new class extends Migration
     {
         Schema::create('ventas', function (Blueprint $table) {
             $table->id();
-            $table->dateTime('fecha_hora');
-            $table->decimal('impuesto', 8, 2)->unsigned();
-            $table->string('num_comprobante', 255);
-            $table->decimal('total', 10, 2);
-            $table->tinyInteger('estado')->default(1);
 
-            $table->foreignId('cliente_id')
-                ->nullable()
-                ->constrained('comprobantes')
-                ->onDelete('set null');
+            $table->dateTime('fecha_hora')->useCurrent();
+
+            $table->decimal('impuesto', 8, 2)->default(0);
+            $table->string('num_comprobante')->nullable();
+
+            $table->decimal('total', 10, 2);
+
+            $table->tinyInteger('estado')->default(1);
 
             $table->timestamps();
         });

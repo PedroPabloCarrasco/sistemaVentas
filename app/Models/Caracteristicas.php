@@ -9,9 +9,15 @@ class Caracteristicas extends Model
 {
     use HasFactory;
 
+    protected $fillable = [
+        'nombre',
+        'descripcion',
+    ];
+
+    // ✅ UNA característica pertenece a UNA categoría
     public function categoria()
     {
-        return $this->hasOne(Categoria::class);
+        return $this->hasOne(Categoria::class, 'caracteristicas_id');
     }
 
     public function marca()
@@ -23,10 +29,4 @@ class Caracteristicas extends Model
     {
         return $this->hasOne(Presentacione::class);
     }
-
-    protected $fillable = [
-        'nombre',
-        'descripcion',
-
-    ];
 }

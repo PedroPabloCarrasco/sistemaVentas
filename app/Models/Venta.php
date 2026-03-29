@@ -5,20 +5,19 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Ventas extends Model
+class Venta extends Model
 {
     use HasFactory;
-    public function cliente()
-    {
-        return $this->belongsTo(Cliente::class);
-    }
-    public function user()
-    {
-        return $this->belongsTo(User::class);
-    }
 
-    public function comprobante()
+    protected $fillable = [
+        'total',
+        'impuesto',
+        'fecha_hora',
+        'estado'
+    ];
+
+    public function detalles()
     {
-        return $this->belongsTo(Comprobante::class);
+        return $this->hasMany(DetalleVenta::class);
     }
 }

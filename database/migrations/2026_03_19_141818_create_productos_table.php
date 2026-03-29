@@ -10,17 +10,16 @@ return new class extends Migration
     {
         Schema::create('productos', function (Blueprint $table) {
             $table->id();
-            $table->string('codigo', 50);
-            $table->string('nombre', 80);
-            $table->integer('stock')->unsigned()->default(0);
-            $table->string('descripcion', 255)->nullable();
-            $table->date('fecha_vencimiento')->nullable();
-            $table->string('img_path', 255)->nullable();
-            $table->tinyInteger('estado')->default(1);
 
-            $table->foreignId('presentacion_id')
-                ->constrained('presentaciones')
-                ->onDelete('cascade');
+            $table->string('nombre');
+            $table->text('descripcion')->nullable();
+
+            $table->decimal('precio', 10, 2);
+            $table->integer('stock')->default(0);
+
+            $table->foreignId('categoria_id')->constrained();
+
+            $table->tinyInteger('estado')->default(1);
 
             $table->timestamps();
         });

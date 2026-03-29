@@ -15,7 +15,11 @@ return new class extends Migration
             $table->id();
             $table->string('nombre', 100);
             $table->text('descripcion')->nullable();
-            $table->tinyInteger('estado')->default(1); // opcional (activo/inactivo)
+
+            // 👇 ESTA LÍNEA TE FALTA
+            $table->foreignId('caracteristicas_id')->constrained()->onDelete('cascade');
+
+            $table->tinyInteger('estado')->default(1);
             $table->timestamps();
         });
     }

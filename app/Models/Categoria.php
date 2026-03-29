@@ -9,18 +9,15 @@ class Categoria extends Model
 {
     use HasFactory;
 
-    public function productos()
-    {
-        return $this->belongsToMany(Producto::class)->withTimestamps();
-    }
+    protected $fillable = [
+        'nombre',
+        'descripcion',
+        'caracteristicas_id',
+    ];
 
+    //  UNA categoría tiene UNA característica
     public function caracteristicas()
     {
-        return $this->belongsTo(Caracteristicas::class);
+        return $this->belongsTo(Caracteristicas::class, 'caracteristicas_id');
     }
-
-    protected $fillable = [
-        'caracteristicas_id',
-
-    ];
 }

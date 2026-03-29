@@ -1,76 +1,111 @@
 <div id="layoutSidenav_nav">
     <nav class="sb-sidenav accordion sb-sidenav-dark" id="sidenavAccordion">
+
         <div class="sb-sidenav-menu">
             <div class="nav">
+
+                <!-- INICIO -->
                 <div class="sb-sidenav-menu-heading">Inicio</div>
-                <a class="nav-link" href="{{ route('panel') }}">
-                    <div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>
+
+                <a class="nav-link {{ request()->routeIs('panel') ? 'active' : '' }}" href="{{ route('panel') }}">
+                    <div class="sb-nav-link-icon">
+                        <i class="fas fa-tachometer-alt"></i>
+                    </div>
                     Panel de Control
                 </a>
-                <!--<div class="sb-sidenav-menu-heading">Interface</div>
-                <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseLayouts"
-                    aria-expanded="false" aria-controls="collapseLayouts">
-                    <div class="sb-nav-link-icon"><i class="fas fa-columns"></i></div>
-                    Layouts
-                    <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
-                </a>
-                <div class="collapse" id="collapseLayouts" aria-labelledby="headingOne"
-                    data-bs-parent="#sidenavAccordion">
-                    <nav class="sb-sidenav-menu-nested nav">
-                        <a class="nav-link" href="layout-static.html">Static Navigation</a>
-                        <a class="nav-link" href="layout-sidenav-light.html">Light Sidenav</a>
-                    </nav>
-                </div>
-                <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapsePages"
-                    aria-expanded="false" aria-controls="collapsePages">
-                    <div class="sb-nav-link-icon"><i class="fas fa-book-open"></i></div>
-                    Pages
-                    <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
-                </a>
-                <div class="collapse" id="collapsePages" aria-labelledby="headingTwo"
-                    data-bs-parent="#sidenavAccordion">
-                    <nav class="sb-sidenav-menu-nested nav accordion" id="sidenavAccordionPages">
-                        <a class="nav-link collapsed" href="#" data-bs-toggle="collapse"
-                            data-bs-target="#pagesCollapseAuth" aria-expanded="false" aria-controls="pagesCollapseAuth">
-                            Authentication
-                            <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
-                        </a>
-                        <div class="collapse" id="pagesCollapseAuth" aria-labelledby="headingOne"
-                            data-bs-parent="#sidenavAccordionPages">
-                            <nav class="sb-sidenav-menu-nested nav">
-                                <a class="nav-link" href="login.html">Login</a>
-                                <a class="nav-link" href="register.html">Register</a>
-                                <a class="nav-link" href="password.html">Forgot Password</a>
-                            </nav>
-                        </div>
-                        <a class="nav-link collapsed" href="#" data-bs-toggle="collapse"
-                            data-bs-target="#pagesCollapseError" aria-expanded="false"
-                            aria-controls="pagesCollapseError">
-                            Error
-                            <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
-                        </a>
-                        <div class="collapse" id="pagesCollapseError" aria-labelledby="headingOne"
-                            data-bs-parent="#sidenavAccordionPages">
-                            <nav class="sb-sidenav-menu-nested nav">
-                                <a class="nav-link" href="401.html">401 Page</a>
-                                <a class="nav-link" href="404.html">404 Page</a>
-                                <a class="nav-link" href="500.html">500 Page</a>
-                            </nav>
-                        </div>
-                    </nav>
-                </div>
-            -->
+
+                <!-- MÓDULOS -->
                 <div class="sb-sidenav-menu-heading">Módulos</div>
-                <a class="nav-link" href="{{ route('categorias.index') }}">
-                    <div class="sb-nav-link-icon"><i class="fa-solid fa-tag"></i></i></div>
-                    Categorias
+
+                <!-- CATEGORÍAS -->
+                <a class="nav-link {{ request()->routeIs('categorias.*') ? 'active' : '' }}"
+                    href="{{ route('categorias.index') }}">
+                    <div class="sb-nav-link-icon">
+                        <i class="fa-solid fa-tag"></i>
+                    </div>
+                    Categorías
                 </a>
+
+                <!-- EJEMPLO SUBMENÚ -->
+                <a class="nav-link collapsed" href="#" data-bs-toggle="collapse"
+                    data-bs-target="#collapseProductos" aria-expanded="false">
+
+                    <div class="sb-nav-link-icon">
+                        <i class="fas fa-box"></i>
+                    </div>
+
+                    Productos
+
+                    <div class="sb-sidenav-collapse-arrow">
+                        <i class="fas fa-angle-down"></i>
+                    </div>
+                </a>
+
+
+                <!-- VENTAS -->
+                <a class="nav-link collapsed {{ request()->routeIs('ventas.*') ? 'active' : '' }}" href="#"
+                    data-bs-toggle="collapse" data-bs-target="#collapseVentas" aria-expanded="false">
+
+                    <div class="sb-nav-link-icon">
+                        <i class="fas fa-cash-register"></i>
+                    </div>
+
+                    Ventas
+
+                    <div class="sb-sidenav-collapse-arrow">
+                        <i class="fas fa-angle-down"></i>
+                    </div>
+                </a>
+
+                <div class="collapse {{ request()->routeIs('ventas.*') ? 'show' : '' }}" id="collapseVentas"
+                    data-bs-parent="#sidenavAccordion">
+
+                    <nav class="sb-sidenav-menu-nested nav">
+
+                        <!-- LISTAR -->
+                        <a class="nav-link {{ request()->routeIs('ventas.index') ? 'active' : '' }}"
+                            href="{{ route('ventas.index') }}">
+                            Listar Ventas
+                        </a>
+
+                        <!-- CREAR -->
+                        <a class="nav-link {{ request()->routeIs('ventas.create') ? 'active' : '' }}"
+                            href="{{ route('ventas.create') }}">
+                            Nueva Venta
+                        </a>
+
+                    </nav>
+                </div>
+
+
+
+
+                <div class="collapse" id="collapseProductos" data-bs-parent="#sidenavAccordion">
+                    <nav class="sb-sidenav-menu-nested nav">
+
+                        <!-- LISTAR -->
+                        <a class="nav-link {{ request()->routeIs('productos.index') ? 'active' : '' }}"
+                            href="{{ route('productos.index') }}">
+                            Listar Productos
+                        </a>
+
+                        <!-- CREAR -->
+                        <a class="nav-link {{ request()->routeIs('productos.create') ? 'active' : '' }}"
+                            href="{{ route('productos.create') }}">
+                            Crear Producto
+                        </a>
+
+                    </nav>
+                </div>
 
             </div>
         </div>
+
+        <!-- FOOTER -->
         <div class="sb-sidenav-footer">
             <div class="small">Bienvenido:</div>
-            Start Bootstrap
+            {{ auth()->user()->name ?? 'Usuario' }}
         </div>
+
     </nav>
 </div>
