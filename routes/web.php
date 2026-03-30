@@ -2,10 +2,12 @@
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
+
 use App\Http\Controllers\CategoriaController;
 use App\Http\Controllers\ProductoController;
 use App\Http\Controllers\VentaController;
 use App\Http\Controllers\BarcodeController;
+use App\Http\Controllers\DashboardController;
 
 /*
 |--------------------------------------------------------------------------
@@ -13,10 +15,6 @@ use App\Http\Controllers\BarcodeController;
 |--------------------------------------------------------------------------
 */
 
-
-
-
-
 Route::get('/', function () {
     return view('template');
 });
@@ -25,18 +23,17 @@ Route::get('/login', function () {
     return view('auth.login');
 })->name('login');
 
-Route::get('/panel', function () {
-    return view('panel.index');
-})->name('panel');
+/*
+|--------------------------------------------------------------------------
+| DASHBOARD (CLAVE)
+|--------------------------------------------------------------------------
+*/
 
-Route::get('/edit', function () {
-    return view('productos/edit');
-});
-
+Route::get('/panel', [DashboardController::class, 'index'])->name('panel');
 
 /*
 |--------------------------------------------------------------------------
-| MÓDULOS (CRUD)
+| CRUD
 |--------------------------------------------------------------------------
 */
 
@@ -44,36 +41,30 @@ Route::resource('categorias', CategoriaController::class);
 Route::resource('productos', ProductoController::class);
 Route::resource('ventas', VentaController::class);
 
-
 /*
 |--------------------------------------------------------------------------
-| PÁGINAS DE ERROR
+| OTROS
 |--------------------------------------------------------------------------
 */
 
-Route::get('/', function () {
-    return view('template');
-});
+Route::get('/barcode', [BarcodeController::class, 'index'])->name('barcode.index');
 
-Route::get('/login', function () {
-    return view('auth.login');
-})->name('login');
+/*
+|--------------------------------------------------------------------------
+| ERRORES
+|--------------------------------------------------------------------------
+*/
 
-Route::get('/panel', function () {
-    return view('panel.index');
-})->name('panel');
-
-// CRUD
-Route::resource('categorias', CategoriaController::class);
-Route::resource('productos', ProductoController::class);
-Route::resource('ventas', VentaController::class);
-
-// Páginas de error
 Route::get('/401', fn() => view('pages.401'));
 Route::get('/404', fn() => view('pages.404'));
 Route::get('/500', fn() => view('pages.500'));
 
-// Logout
+/*
+|--------------------------------------------------------------------------
+| LOGOUT
+|--------------------------------------------------------------------------
+*/
+
 Route::post('/logout', function () {
     Auth::logout();
     request()->session()->invalidate();
@@ -82,4 +73,14 @@ Route::post('/logout', function () {
     return redirect('/login');
 })->name('logout');
 
-Route::get('/barcode', [BarcodeController::class, 'index'])->name('barcode.index');
+
+Route::get('/api/producto/{codigo}', function ($codigo) {
+    return \App\Models\Producto::where('codigo', $codigo)->first();
+});
+
+Route::get('/ventas/{id}/ticket', [VentaController::class, 'ticket'])->name('ventas.ticket');
+Route::get('/api/clientes', function () {
+    return \App\Models\Cliente::all();
+});
+
+Route::resource('ventas', VentaController::class);

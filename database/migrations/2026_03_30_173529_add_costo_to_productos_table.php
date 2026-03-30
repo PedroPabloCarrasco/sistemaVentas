@@ -4,18 +4,18 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class AddCostoToDetalleVentasTable extends Migration
+class AddCostoToProductosTable extends Migration
 {
     public function up()
     {
-        Schema::table('detalle_ventas', function (Blueprint $table) {
+        Schema::table('productos', function (Blueprint $table) {
             $table->decimal('costo', 10, 2)->default(0)->after('precio');
         });
     }
 
     public function down()
     {
-        Schema::table('detalle_ventas', function (Blueprint $table) {
+        Schema::table('productos', function (Blueprint $table) {
             $table->dropColumn('costo');
         });
     }

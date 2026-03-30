@@ -1,47 +1,89 @@
 @extends('template')
 
-@section('title', 'Leer Código de Barra')
+@section('title', 'POS Escáner')
 
 @section('content')
 
     <div class="container mx-auto px-4 mt-8">
 
-        <!-- Header -->
-        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+        <!-- HEADER -->
+        <div class="flex justify-between items-center mb-6">
             <div>
-                <h1 class="text-3xl font-bold text-white">Escáner</h1>
-                <p class="text-gray-400 text-sm">Captura automática de códigos de barras</p>
+                <h1 class="text-3xl font-bold text-white">POS Escáner</h1>
+                <p class="text-gray-400 text-sm">Escanea productos y agrégalos a la venta</p>
             </div>
 
-            <div class="flex items-center gap-2 mt-4 md:mt-0">
-                <span class="w-3 h-3 bg-green-500 rounded-full animate-pulse"></span>
-                <span id="statusText" class="text-gray-300 text-sm">Inicializando...</span>
-            </div>
+            <span id="statusText" class="text-gray-300 text-sm">Listo</span>
         </div>
 
-        <!-- Card -->
-        <div class="bg-gray-900 rounded-2xl shadow-2xl p-6">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
 
-            <!-- Scanner -->
-            <div id="reader" class="w-full mb-6 rounded-xl overflow-hidden border-2 border-dashed border-gray-700"
-                style="min-height:300px;">
-            </div>
+            <!-- SCANNER -->
+            <div class="md:col-span-1 bg-gray-900 p-4 rounded-2xl">
+                <div id="reader" style="min-height:250px;"></div>
 
-            <!-- Resultado -->
-            <div class="mb-6">
-                <label class="block text-gray-300 text-sm mb-2">Código detectado</label>
-                <input type="text" id="barcodeResult"
-                    class="w-full bg-black text-white border border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500"
-                    placeholder="Esperando escaneo..." readonly>
-            </div>
-
-            <!-- Botón -->
-            <div class="flex justify-end">
-                <button id="restartBtn"
-                    class="bg-black text-white font-bold px-6 py-2 rounded-xl shadow-lg 
-                       hover:bg-gray-800 hover:shadow-2xl transition-all">
-                    Reiniciar
+                <button id="startBtn" class="w-full mt-4 bg-black text-white py-2 rounded-xl hover:bg-gray-800 transition">
+                    Iniciar Cámara
                 </button>
+            </div>
+
+            <!-- PANEL -->
+            <div class="md:col-span-2 bg-gray-900 p-6 rounded-2xl">
+
+                <!-- INPUT -->
+                <input type="text" id="barcodeResult"
+                    class="w-full mb-4 bg-black text-white border border-gray-700 px-4 py-3 rounded-lg"
+                    placeholder="Código escaneado..." readonly>
+
+                <!-- LISTA -->
+                <div class="overflow-y-auto max-h-64 mb-4">
+                    <table class="w-full text-white">
+                        <thead>
+                            <tr class="text-gray-400 text-sm">
+                                <th class="text-left">Producto</th>
+                                <th>Cant</th>
+                                <th>Precio</th>
+                                <th>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody id="carrito"></tbody>
+                    </table>
+                </div>
+
+                <!-- CLIENTE -->
+                <div class="mb-4">
+                    <label class="text-gray-300 text-sm">Cliente</label>
+                    <select id="cliente" class="w-full bg-black text-white px-4 py-2 rounded-lg">
+                        <option value="">Cliente General</option>
+                    </select>
+                </div>
+
+                <!-- MÉTODO PAGO -->
+                <div class="mb-4">
+                    <label class="text-gray-300 text-sm">Método de Pago</label>
+                    <select id="metodoPago" class="w-full bg-black text-white px-4 py-2 rounded-lg">
+                        <option value="efectivo">Efectivo</option>
+                        <option value="tarjeta">Tarjeta</option>
+                    </select>
+                </div>
+
+                <!-- TOTAL -->
+                <div class="flex justify-between items-center">
+                    <h2 class="text-xl text-white">Total:</h2>
+                    <span id="totalVenta" class="text-2xl font-bold text-green-400">$0</span>
+                </div>
+
+                <!-- BOTONES -->
+                <div class="flex gap-3 mt-4">
+                    <button id="clearBtn" class="bg-black text-white px-6 py-2 rounded-xl hover:bg-gray-800">
+                        Limpiar
+                    </button>
+
+                    <button id="guardarBtn" class="bg-black text-white px-6 py-2 rounded-xl hover:bg-gray-800">
+                        Finalizar Venta
+                    </button>
+                </div>
+
             </div>
 
         </div>
@@ -52,100 +94,170 @@
 
 
 @push('js')
-    {{-- 🔴 IMPORTANTE: debe coincidir con tu template --}}
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
 
     <script>
         document.addEventListener("DOMContentLoaded", function() {
 
+            let scanner;
+            let carrito = [];
+            let total = 0;
+
+            const carritoHTML = document.getElementById('carrito');
+            const totalHTML = document.getElementById('totalVenta');
             const resultInput = document.getElementById('barcodeResult');
             const statusText = document.getElementById('statusText');
-            const restartBtn = document.getElementById('restartBtn');
 
-            let html5Qrcode = null;
-            let isScanning = false;
+            const beep = new Audio("https://www.soundjay.com/buttons/sounds/beep-07.mp3");
 
-            if (typeof Html5Qrcode === "undefined") {
-                statusText.innerText = "Error cargando librería ❌";
-                return;
+            // 🔥 CARGAR CLIENTES
+            async function cargarClientes() {
+                const res = await fetch('/api/clientes');
+                const clientes = await res.json();
+
+                const select = document.getElementById('cliente');
+
+                clientes.forEach(c => {
+                    select.innerHTML += `<option value="${c.id}">${c.nombre}</option>`;
+                });
             }
 
+            // 🔥 SCANNER
             async function startScanner() {
+
+                const devices = await Html5Qrcode.getCameras();
+
+                if (!devices.length) {
+                    statusText.innerText = "No hay cámara ❌";
+                    return;
+                }
+
+                let cameraId = devices[0].id;
+
+                scanner = new Html5Qrcode("reader");
+
+                statusText.innerText = "Escaneando...";
+
+                await scanner.start(
+                    cameraId, {
+                        fps: 10,
+                        qrbox: {
+                            width: 250,
+                            height: 150
+                        }
+                    },
+                    async (code) => {
+
+                        beep.play();
+                        resultInput.value = code;
+
+                        await buscarProducto(code);
+                    }
+                );
+            }
+
+            // 🔥 BUSCAR PRODUCTO
+            async function buscarProducto(codigo) {
                 try {
-                    statusText.innerText = "Solicitando cámara...";
+                    const res = await fetch(`/api/producto/${codigo}`);
+                    const data = await res.json();
 
-                    const devices = await Html5Qrcode.getCameras();
-
-                    if (!devices.length) {
-                        statusText.innerText = "No hay cámara ❌";
+                    if (!data) {
+                        statusText.innerText = "Producto no encontrado ❌";
                         return;
                     }
 
-                    // 🔥 fallback inteligente
-                    const cameraId = devices[0].id;
+                    agregarAlCarrito(data);
+                    statusText.innerText = "Producto agregado ✔";
 
-                    html5Qrcode = new Html5Qrcode("reader");
-
-                    statusText.innerText = "Escaneando...";
-
-                    await html5Qrcode.start(
-                        cameraId, {
-                            fps: 10,
-                            qrbox: 250
-                        },
-                        (decodedText) => {
-
-                            if (!isScanning) return;
-
-                            resultInput.value = decodedText;
-                            resultInput.classList.add("border-green-500");
-
-                            statusText.innerText = "Código detectado ✔";
-                            isScanning = false;
-
-                            stopScanner();
-                        },
-                        () => {}
-                    );
-
-                    isScanning = true;
-
-                } catch (error) {
-                    console.error(error);
-
-                    if (error.name === "NotAllowedError") {
-                        statusText.innerText = "Permiso denegado ❌";
-                    } else {
-                        statusText.innerText = "Error al iniciar cámara ❌";
-                    }
+                } catch {
+                    statusText.innerText = "Error buscando producto ❌";
                 }
             }
 
-            async function stopScanner() {
-                if (html5Qrcode) {
-                    try {
-                        await html5Qrcode.stop();
-                        await html5Qrcode.clear(); // 🔥 clave para evitar bugs
-                        html5Qrcode = null;
-                        isScanning = false;
-                    } catch (e) {}
+            // 🔥 AGREGAR AL CARRITO
+            function agregarAlCarrito(producto) {
+
+                let item = carrito.find(p => p.id === producto.id);
+
+                if (item) {
+                    item.cantidad++;
+                } else {
+                    carrito.push({
+                        ...producto,
+                        cantidad: 1
+                    });
                 }
+
+                renderCarrito();
             }
 
-            // ▶️ iniciar
-            startScanner();
+            // 🔥 RENDER
+            function renderCarrito() {
 
-            // 🔄 reiniciar
-            restartBtn.addEventListener('click', async () => {
-                resultInput.value = "";
-                resultInput.classList.remove("border-green-500");
+                carritoHTML.innerHTML = "";
+                total = 0;
 
-                await stopScanner();
-                startScanner();
+                carrito.forEach(p => {
+
+                    let subtotal = p.precio * p.cantidad;
+                    total += subtotal;
+
+                    carritoHTML.innerHTML += `
+                <tr>
+                    <td>${p.nombre}</td>
+                    <td>${p.cantidad}</td>
+                    <td>$${p.precio}</td>
+                    <td>$${subtotal}</td>
+                </tr>
+            `;
+                });
+
+                totalHTML.innerText = "$" + total.toLocaleString('es-CL');
+            }
+
+            // 🔥 LIMPIAR
+            document.getElementById('clearBtn').addEventListener('click', () => {
+                carrito = [];
+                renderCarrito();
             });
 
-            // 🛑 limpiar al salir
-            window.addEventListener('beforeunload', stopScanner);
+            // 🔥 GUARDAR VENTA
+            document.getElementById('guardarBtn').addEventListener('click', async () => {
+
+                if (carrito.length === 0) return;
+
+                const res = await fetch('/ventas', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({
+                        productos: carrito,
+                        cliente_id: document.getElementById('cliente').value,
+                        metodo_pago: document.getElementById('metodoPago').value
+                    })
+                });
+
+                const data = await res.json();
+
+                if (data.success) {
+
+                    // 🧾 BOLETA
+                    window.open(`/ventas/${data.venta_id}/ticket`, '_blank');
+
+                    carrito = [];
+                    renderCarrito();
+                    statusText.innerText = "Venta realizada ✔";
+                }
+            });
+
+            // ▶️ INICIAR
+            document.getElementById('startBtn').addEventListener('click', startScanner);
+
+            // 🔥 INIT
+            cargarClientes();
 
         });
     </script>
