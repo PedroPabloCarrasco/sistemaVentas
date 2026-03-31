@@ -13175,3 +13175,22 @@ body {
     font-size: 0.75rem;
     border-radius: 0.375rem !important;
 }
+
+
+@media print {
+    body * {
+        visibility: hidden;
+    }
+
+    #boletaContent,
+    #boletaContent * {
+        visibility: visible;
+    }
+
+    #boletaContent {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+    }
+}

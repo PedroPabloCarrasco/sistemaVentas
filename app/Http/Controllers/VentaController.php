@@ -165,4 +165,26 @@ class VentaController extends Controller
             return back()->with('error', 'Error al eliminar la venta: ' . $e->getMessage());
         }
     }
+
+
+    public function cambiarEstado(Request $request, $id)
+    {
+        $venta = Venta::findOrFail($id);
+        $venta->estado = $request->estado;
+        $venta->save();
+
+        return response()->json(['success' => true]);
+    }
+
+
+    public function chartData()
+    {
+        $ventas = \App\Models\Venta::selectRaw('DATE(created_at) as fecha, SUM(total) as total')
+            ->where('created_at', '>=', now()->subDays(7)) // últimos 7 días
+            ->groupBy('fecha')
+            ->orderBy('fecha')
+            ->get();
+
+        return response()->json($ventas);
+    }
 }

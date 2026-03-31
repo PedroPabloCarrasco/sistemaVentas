@@ -213,53 +213,67 @@
     <script>
         let productos = [];
 
+        // ✅ Formato chileno
         function formatearCLP(valor) {
             return Number(valor).toLocaleString('es-CL', {
-                minimumFractionDigits: 0,
-                maximumFractionDigits: 0
+                minimumFractionDigits: 0
             });
         }
 
+        // ✅ Agregar producto
         function agregarProducto() {
             let select = document.getElementById('producto');
             let cantidad = parseInt(document.getElementById('cantidad').value);
+
             if (cantidad < 1) return;
 
             let id = select.value;
+
             let existente = productos.find(p => p.id == id);
-            if (existente) existente.cantidad += cantidad;
-            else productos.push({
-                id,
-                cantidad
-            });
+            if (existente) {
+                existente.cantidad += cantidad;
+            } else {
+                productos.push({
+                    id,
+                    cantidad
+                });
+            }
 
             renderTabla();
         }
 
+        // ✅ Render tabla
         function renderTabla() {
             let lista = document.getElementById('lista');
             lista.innerHTML = "";
 
             let total = 0;
+
             productos.forEach(p => {
-                let option = [...document.getElementById('producto').options].find(o => o.value == p.id);
+                let option = [...document.getElementById('producto').options]
+                    .find(o => o.value == p.id);
+
                 let nombre = option.text;
                 let precio = parseFloat(option.dataset.precio);
                 let subtotal = precio * p.cantidad;
+
                 total += subtotal;
 
-                lista.innerHTML += `<tr>
-            <td>${nombre}</td>
-            <td>${p.cantidad}</td>
-            <td>${formatearCLP(precio)}</td>
-            <td>${formatearCLP(subtotal)}</td>
-        </tr>`;
+                lista.innerHTML += `
+            <tr>
+                <td>${nombre}</td>
+                <td>${p.cantidad}</td>
+                <td>$${formatearCLP(precio)}</td>
+                <td>$${formatearCLP(subtotal)}</td>
+            </tr>
+        `;
             });
 
             document.getElementById('total').innerText = formatearCLP(total);
             document.getElementById('productosInput').value = JSON.stringify(productos);
         }
 
+        // ✅ Guardar venta (FIX TOTAL)
         document.getElementById('ventaForm').addEventListener('submit', function(e) {
             e.preventDefault();
 
@@ -279,77 +293,73 @@
                     try {
                         return JSON.parse(text);
                     } catch (e) {
-                        console.error("Laravel devolvió HTML:", text);
-                        throw new Error("Respuesta no es JSON");
+                        console.error("Respuesta HTML:", text);
+                        throw new Error("No es JSON");
                     }
                 })
                 .then(data => {
                     if (data.success) {
                         mostrarBoleta(data.venta);
+
                         productos = [];
                         renderTabla();
 
                         document.getElementById('alert-container').innerHTML =
-                            `<div class="alert alert-success">${data.message}</div>`;
+                            `<div class="alert alert-success">✅ ${data.message}</div>`;
                     } else {
                         document.getElementById('alert-container').innerHTML =
-                            `<div class="alert alert-danger">${data.error ?? 'Error desconocido'}</div>`;
+                            `<div class="alert alert-danger">❌ ${data.error}</div>`;
                     }
                 })
                 .catch(err => {
                     console.error(err);
 
                     document.getElementById('alert-container').innerHTML =
-                        `<div class="alert alert-danger">Error real del servidor (revisa consola)</div>`;
+                        `<div class="alert alert-danger">🚨 Error servidor</div>`;
                 });
         });
 
+        // ✅ Boleta tipo ticket
         function mostrarBoleta(venta) {
             let html = `
-    <div class="boleta-header">
-        <h2>Boleta de Venta</h2>
-        <p>${new Date(venta.created_at).toLocaleString('es-CL')}</p>
+    <div style="width:300px; margin:auto; font-family:monospace; font-size:13px;">
+
+        <div style="text-align:center;">
+            <h3>MI NEGOCIO</h3>
+            <p>RUT: 12.345.678-9</p>
+            <p>--------------------------</p>
+        </div>
+
+        <p>Fecha: ${new Date(venta.created_at).toLocaleString('es-CL')}</p>
+        <p>Boleta: #${venta.id}</p>
+        <p>Cliente: ${venta.cliente ?? 'Consumidor Final'}</p>
+
+        <p>--------------------------</p>
+
+        ${venta.detalles.map(d => `
+                <p>${d.producto}</p>
+                <p>${d.cantidad} x $${formatearCLP(d.precio)} = $${formatearCLP(d.precio * d.cantidad)}</p>
+            `).join('')}
+
+        <p>--------------------------</p>
+
+        <h3 style="text-align:right;">TOTAL: $${formatearCLP(venta.total)}</h3>
+
+        <p style="text-align:center;">Gracias por su compra</p>
+
+        <div style="text-align:center;">
+            <button onclick="window.print()">🖨️ Imprimir</button>
+        </div>
     </div>
-    <div class="boleta-info">
-        <div><strong>Cliente:</strong> ${venta.cliente ?? 'Consumidor Final'}</div>
-        <div><strong>Venta ID:</strong> #${venta.id}</div>
-    </div>
-    <table class="boleta-table">
-        <thead>
-            <tr>
-                <th>Producto</th><th>Cantidad</th><th>Precio</th><th>Subtotal</th>
-            </tr>
-        </thead>
-        <tbody>
-            ${venta.detalles.map(function(d){
-                return `
-                            <tr>
-                                <td>${d.producto}</td>
-                                <td>${d.cantidad}</td>
-                                <td>${formatearCLP(d.precio)}</td>
-                                <td>${formatearCLP(d.precio * d.cantidad)}</td>
-                            </tr>
-                        `;
-            }).join('')}
-        </tbody>
-    </table>
-    <div class="boleta-total">
-        Total: $${formatearCLP(venta.total)}
-    </div>
-    <div class="boleta-actions">
-        <button onclick="window.print()" class="btn btn-primary">🖨️ Imprimir Boleta</button>
-        <a href="{{ route('ventas.index') }}" class="btn btn-secondary">Volver</a>
-    </div>`;
+    `;
 
             document.getElementById('boletaContent').innerHTML = html;
             document.getElementById('boletaModal').style.display = 'block';
         }
 
+        // ✅ cerrar modal
         function cerrarModal() {
             document.getElementById('boletaModal').style.display = 'none';
-        }
-        window.onclick = function(event) {
-            if (event.target == document.getElementById('boletaModal')) cerrarModal();
         }
     </script>
 @endsection

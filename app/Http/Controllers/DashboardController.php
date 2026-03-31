@@ -14,34 +14,40 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        // Fechas
         $hoy = Carbon::today();
         $inicioMes = Carbon::now()->startOfMonth();
 
         /*
         |--------------------------------------------------------------------------
-        | MÉTRICAS
+        | MÉTRICAS PRINCIPALES
         |--------------------------------------------------------------------------
         */
 
-        // Ingresos del día
         $ingresosHoy = Venta::whereDate('fecha_hora', $hoy)->sum('total') ?? 0;
-
-        // Ingresos totales
         $ingresosTotales = Venta::sum('total') ?? 0;
-
-        // Ventas del mes
         $ventasMes = Venta::where('fecha_hora', '>=', $inicioMes)->count();
-
-        // Productos activos
         $productosActivos = Producto::count();
-
-        // Clientes
         $clientes = User::count();
 
         /*
         |--------------------------------------------------------------------------
-        | GRÁFICO (VENTAS POR DÍA)
+        | PORCENTAJES (KPIs)
+        |--------------------------------------------------------------------------
+        */
+
+        $ventasHoy = Venta::whereDate('fecha_hora', $hoy)->count();
+
+        $porcentajeIngresos = $ingresosTotales > 0
+            ? round(($ingresosHoy / $ingresosTotales) * 100)
+            : 0;
+
+        $porcentajeVentas = $ventasMes > 0
+            ? round(($ventasHoy / $ventasMes) * 100)
+            : 0;
+
+        /*
+        |--------------------------------------------------------------------------
+        | VENTAS POR DÍA (GRÁFICO)
         |--------------------------------------------------------------------------
         */
 
@@ -56,28 +62,7 @@ class DashboardController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | PRODUCTOS RECIENTES
-        |--------------------------------------------------------------------------
-        */
-
-        $productosRecientes = Producto::latest()
-            ->take(5)
-            ->get();
-
-        /*
-        |--------------------------------------------------------------------------
-        | ÚLTIMAS VENTAS
-        |--------------------------------------------------------------------------
-        */
-
-        $ultimasOrdenes = Venta::with('detalles.producto')
-            ->orderBy('id', 'desc')
-            ->take(5)
-            ->get();
-
-        /*
-        |--------------------------------------------------------------------------
-        | TOP PRODUCTOS MÁS VENDIDOS
+        | TOP PRODUCTOS
         |--------------------------------------------------------------------------
         */
 
@@ -91,9 +76,46 @@ class DashboardController extends Controller
             ->take(5)
             ->get();
 
+        // Normalizar porcentajes (para barras)
+        $maxVentas = $topProductos->max('total_vendidos') ?: 1;
+
+        $topProductos = $topProductos->map(function ($item) use ($maxVentas) {
+            $item->porcentaje = ($item->total_vendidos / $maxVentas) * 100;
+            return $item;
+        });
+
         /*
         |--------------------------------------------------------------------------
-        | PRODUCTOS CON STOCK BAJO
+        | DONUT (SIN ERROR)
+        |--------------------------------------------------------------------------
+        */
+
+        $ventas = Venta::count();
+        $servicios = 0; // no usamos 'tipo' para evitar error
+        $otros = $ventas;
+
+        /*
+        |--------------------------------------------------------------------------
+        | PRODUCTOS RECIENTES
+        |--------------------------------------------------------------------------
+        */
+
+        $productosRecientes = Producto::latest()->take(5)->get();
+
+        /*
+        |--------------------------------------------------------------------------
+        | ÚLTIMAS VENTAS
+        |--------------------------------------------------------------------------
+        */
+
+        $ultimasOrdenes = Venta::with('detalles.producto')
+            ->latest()
+            ->take(5)
+            ->get();
+
+        /*
+        |--------------------------------------------------------------------------
+        | STOCK BAJO
         |--------------------------------------------------------------------------
         */
 
@@ -101,7 +123,7 @@ class DashboardController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | RETORNO A LA VISTA
+        | RETURN
         |--------------------------------------------------------------------------
         */
 
@@ -115,7 +137,12 @@ class DashboardController extends Controller
             'productosRecientes',
             'ultimasOrdenes',
             'topProductos',
-            'productosBajoStock'
+            'productosBajoStock',
+            'porcentajeIngresos',
+            'porcentajeVentas',
+            'ventas',
+            'servicios',
+            'otros'
         ));
     }
 }
