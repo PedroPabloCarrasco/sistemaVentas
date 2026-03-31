@@ -11,19 +11,27 @@ use Carbon\Carbon;
 
 class VentaController extends Controller
 {
-
+    /**
+     * Mostrar todas las ventas
+     */
     public function index()
     {
         $ventas = Venta::orderBy('id', 'desc')->get();
         return view('ventas.index', compact('ventas'));
     }
 
+    /**
+     * Mostrar una venta específica
+     */
     public function show($id)
     {
-        $venta = Venta::with('detalles.producto')->findOrFail($id);
+        $venta = Venta::with('detalles.producto', 'cliente')->findOrFail($id);
         return view('ventas.show', compact('venta'));
     }
 
+    /**
+     * Formulario para nueva venta
+     */
     public function create()
     {
         $productos = Producto::where('estado', 1)->get();
@@ -31,24 +39,23 @@ class VentaController extends Controller
     }
 
     /**
-     * 🔥 GUARDAR VENTA (COMPATIBLE CON POS + FORMULARIO)
+     * Guardar venta (compatible con AJAX y formulario normal)
      */
     public function store(Request $request)
     {
         DB::beginTransaction();
 
         try {
-
-            // 🔥 Soporta JSON (POS) o formulario normal
+            // Obtener los productos (JSON o array)
             $items = is_array($request->productos)
                 ? $request->productos
                 : json_decode($request->productos, true);
 
-            if (!$items || count($items) == 0) {
+            if (!$items || count($items) === 0) {
                 throw new \Exception("No hay productos en la venta");
             }
 
-            // 🔥 Crear venta con más datos
+            // Crear venta
             $venta = Venta::create([
                 'total' => 0,
                 'impuesto' => 0,
@@ -61,11 +68,10 @@ class VentaController extends Controller
             $total = 0;
 
             foreach ($items as $item) {
-
                 $producto = Producto::findOrFail($item['id']);
                 $cantidad = (int) $item['cantidad'];
 
-                // ❌ Validar stock
+                // Validar stock
                 if ($producto->stock < $cantidad) {
                     throw new \Exception("Stock insuficiente de {$producto->nombre}");
                 }
@@ -73,7 +79,7 @@ class VentaController extends Controller
                 $precio = $producto->precio;
                 $subtotal = $precio * $cantidad;
 
-                // ✅ Guardar detalle
+                // Guardar detalle de venta
                 DetalleVenta::create([
                     'venta_id' => $venta->id,
                     'producto_id' => $producto->id,
@@ -81,31 +87,48 @@ class VentaController extends Controller
                     'precio' => $precio
                 ]);
 
-                // ✅ Descontar stock
+                // Descontar stock
                 $producto->decrement('stock', $cantidad);
 
                 $total += $subtotal;
             }
 
-            // ✅ Actualizar total final
+            // Actualizar total final
             $venta->update([
                 'total' => $total
             ]);
 
             DB::commit();
 
-            // 🔥 RESPUESTA PARA POS (fetch)
-            if ($request->expectsJson()) {
+            // Respuesta JSON para AJAX
+            if ($request->ajax() || $request->wantsJson()) {
+                $venta->load('detalles.producto', 'cliente');
+
+                $detalles = $venta->detalles->map(function ($d) {
+                    return [
+                        'producto' => $d->producto->nombre,
+                        'cantidad' => $d->cantidad,
+                        'precio' => $d->precio
+                    ];
+                });
+
                 return response()->json([
                     'success' => true,
-                    'venta_id' => $venta->id
+                    'message' => 'Venta realizada correctamente',
+                    'venta' => [
+                        'id' => $venta->id,
+                        'total' => $venta->total,
+                        'cliente' => optional($venta->cliente)->name ?? 'Consumidor Final',
+                        'detalles' => $detalles,
+                        'created_at' => $venta->created_at
+                    ]
                 ]);
             }
 
+            // Para formulario normal
             return redirect()->route('ventas.create')
                 ->with('success', 'Venta realizada correctamente');
         } catch (\Exception $e) {
-
             DB::rollBack();
 
             if ($request->expectsJson()) {
@@ -119,26 +142,22 @@ class VentaController extends Controller
     }
 
     /**
-     * 🧾 TICKET / BOLETA
+     * Mostrar ticket / boleta
      */
     public function ticket($id)
     {
-        $venta = Venta::with('detalles.producto')->findOrFail($id);
+        $venta = Venta::with('detalles.producto', 'cliente')->findOrFail($id);
         return view('ventas.ticket', compact('venta'));
     }
 
-
-
     /**
-     * Eliminar una venta
+     * Eliminar venta
      */
     public function destroy($id)
     {
         try {
             $venta = Venta::findOrFail($id);
-
-            // Esto eliminará también los detalles relacionados si la relación está definida con cascade
-            $venta->delete();
+            $venta->delete(); // eliminar detalles si cascade está definido
 
             return redirect()->route('ventas.index')
                 ->with('success', 'Venta eliminada correctamente');
