@@ -96,4 +96,17 @@ class ProductoController extends Controller
         return redirect()->route('productos.index')
             ->with('success', 'Producto eliminado correctamente');
     }
+
+    public function buscarPorCodigo($codigo)
+    {
+        $producto = Producto::where('codigo_barra', $codigo)->first();
+
+        if (!$producto) {
+            return redirect()->back()->with('error', 'Producto no encontrado');
+        }
+
+        return redirect()->route('ventas.create', [
+            'producto_id' => $producto->id
+        ]);
+    }
 }

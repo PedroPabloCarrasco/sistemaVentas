@@ -8,6 +8,8 @@ use App\Http\Controllers\ProductoController;
 use App\Http\Controllers\VentaController;
 use App\Http\Controllers\BarcodeController;
 use App\Http\Controllers\DashboardController;
+use Illuminate\Http\Request;
+use App\Models\Producto;
 
 /*
 |--------------------------------------------------------------------------
@@ -25,7 +27,7 @@ Route::get('/login', function () {
 
 /*
 |--------------------------------------------------------------------------
-| DASHBOARD (CLAVE)
+| DASHBOARD
 |--------------------------------------------------------------------------
 */
 
@@ -43,11 +45,54 @@ Route::resource('ventas', VentaController::class);
 
 /*
 |--------------------------------------------------------------------------
-| OTROS
+| ESCÁNER DE CÓDIGOS DE BARRA
 |--------------------------------------------------------------------------
 */
 
+// Vista principal del escáner y carrito
 Route::get('/barcode', [BarcodeController::class, 'index'])->name('barcode.index');
+
+// Vista opcional de scanner simple
+Route::get('/scanner', function () {
+    return view('ventas.scan');
+});
+
+// Ruta GET para buscar productos por código (opcional, URL directa)
+Route::get('/productos/buscar/{codigo}', [ProductoController::class, 'buscarPorCodigo']);
+
+// Ruta POST para buscar productos vía AJAX (desde JS / escáner)
+Route::post('/buscar-producto', function (Request $request) {
+    $codigo = $request->input('codigo_barra');
+    $producto = Producto::where('codigo_barra', $codigo)->first();
+
+    if ($producto) {
+        return response()->json([
+            'success' => true,
+            'producto' => $producto
+        ]);
+    } else {
+        return response()->json([
+            'success' => false,
+            'message' => 'Producto no encontrado'
+        ]);
+    }
+});
+
+/*
+|--------------------------------------------------------------------------
+| API Y OTROS DATOS
+|--------------------------------------------------------------------------
+*/
+
+Route::get('/api/producto/{codigo}', function ($codigo) {
+    return Producto::where('codigo', $codigo)->first();
+});
+
+Route::get('/api/clientes', function () {
+    return \App\Models\Cliente::all();
+});
+
+Route::get('/ventas/{id}/ticket', [VentaController::class, 'ticket'])->name('ventas.ticket');
 
 /*
 |--------------------------------------------------------------------------
@@ -69,18 +114,5 @@ Route::post('/logout', function () {
     Auth::logout();
     request()->session()->invalidate();
     request()->session()->regenerateToken();
-
     return redirect('/login');
 })->name('logout');
-
-
-Route::get('/api/producto/{codigo}', function ($codigo) {
-    return \App\Models\Producto::where('codigo', $codigo)->first();
-});
-
-Route::get('/ventas/{id}/ticket', [VentaController::class, 'ticket'])->name('ventas.ticket');
-Route::get('/api/clientes', function () {
-    return \App\Models\Cliente::all();
-});
-
-Route::resource('ventas', VentaController::class);

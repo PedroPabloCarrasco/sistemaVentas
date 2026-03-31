@@ -6,9 +6,8 @@ use Illuminate\Http\Request;
 
 class BarcodeController extends Controller
 {
-    // Método que sirve para mostrar la vista
     public function index()
     {
-        return view('barcode.index'); // Asegúrate de que esta vista exista
+        return view('barcode.index'); // apunta a resources/views/barcode/index.blade.php
     }
 }
