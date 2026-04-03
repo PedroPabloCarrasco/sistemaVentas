@@ -291,7 +291,7 @@
         let productos = [];
 
         function clp(n) {
-            return Number(n).toLocaleString('es-CL');
+            return Math.round(Number(n)).toLocaleString('es-CL');
         }
 
         function agregarProducto() {
@@ -451,29 +451,43 @@
         <div class="boleta-divider"></div>
 
         <!-- TABLA -->
-        <div class="boleta-table">
+<div class="boleta-table">
 
-            <div class="boleta-row boleta-head">
-                <span>Item</span>
-                <span>Total</span>
+    <div class="boleta-row boleta-head">
+        <span>Item</span>
+        <span>Total</span>
+    </div>
+
+    <div class="boleta-divider"></div>
+
+    ${venta.detalles.map(d => `
+            <div class="boleta-item">
+
+                <div class="item-nombre">${d.producto}</div>
+
+                <div class="boleta-row">
+                    <span>${d.cantidad} x $${clp(d.precio)}</span>
+                    <span>$${clp(d.cantidad * d.precio)}</span>
+                </div>
+
             </div>
+        `).join('')}
 
-            <div class="boleta-divider"></div>
+    <div class="boleta-divider"></div>
 
-            ${venta.detalles.map(d => `
-                                        <div class="boleta-item">
+    <!-- SUBTOTAL -->
+    <div class="boleta-row">
+        <span>SUBTOTAL</span>
+        <span>$${clp(venta.total - venta.impuesto)}</span>
+    </div>
 
-                                            <div class="item-nombre">${d.producto}</div>
+    <!-- IVA -->
+    <div class="boleta-row">
+        <span>IVA (19%)</span>
+        <span>$${clp(venta.impuesto)}</span>
+    </div>
 
-                                            <div class="boleta-row">
-                                                <span>${d.cantidad} x $${clp(d.precio)}</span>
-                                                <span>$${clp(d.cantidad * d.precio)}</span>
-                                            </div>
-
-                                        </div>
-                                    `).join('')}
-
-        </div>
+</div>
 
         <div class="boleta-divider"></div>
 
