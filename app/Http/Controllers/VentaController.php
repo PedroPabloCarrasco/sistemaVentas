@@ -39,7 +39,6 @@ class VentaController extends Controller
 
         try {
 
-            // 🔥 Soporta JSON (POS) o formulario normal
             $items = is_array($request->productos)
                 ? $request->productos
                 : json_decode($request->productos, true);
@@ -48,12 +47,11 @@ class VentaController extends Controller
                 throw new \Exception("No hay productos en la venta");
             }
 
-            // 🔥 Crear venta con más datos
             $venta = Venta::create([
                 'total' => 0,
                 'impuesto' => 0,
                 'fecha_hora' => Carbon::now(),
-                'estado' => 'completada',
+                'estado' => 1,
                 'metodo_pago' => $request->metodo_pago ?? 'efectivo',
                 'cliente_id' => $request->cliente_id ?? null
             ]);
@@ -65,7 +63,6 @@ class VentaController extends Controller
                 $producto = Producto::findOrFail($item['id']);
                 $cantidad = (int) $item['cantidad'];
 
-                // ❌ Validar stock
                 if ($producto->stock < $cantidad) {
                     throw new \Exception("Stock insuficiente de {$producto->nombre}");
                 }
@@ -73,7 +70,6 @@ class VentaController extends Controller
                 $precio = $producto->precio;
                 $subtotal = $precio * $cantidad;
 
-                // ✅ Guardar detalle
                 DetalleVenta::create([
                     'venta_id' => $venta->id,
                     'producto_id' => $producto->id,
@@ -81,24 +77,45 @@ class VentaController extends Controller
                     'precio' => $precio
                 ]);
 
-                // ✅ Descontar stock
                 $producto->decrement('stock', $cantidad);
 
                 $total += $subtotal;
             }
 
-            // ✅ Actualizar total final
+            // 💰 calcular impuesto (opcional)
+            $impuesto = round($total * 0.19, 2);
+            $totalFinal = $total + $impuesto;
+
             $venta->update([
-                'total' => $total
+                'impuesto' => $impuesto,
+                'total' => $totalFinal
             ]);
 
             DB::commit();
 
-            // 🔥 RESPUESTA PARA POS (fetch)
+            // 🔥 CARGAR RELACIONES
+            $venta->load('detalles.producto');
+
+            // 🔥 FORMATEAR RESPUESTA PARA BOLETA
+            $detalles = $venta->detalles->map(function ($d) {
+                return [
+                    'producto' => $d->producto->nombre,
+                    'cantidad' => $d->cantidad,
+                    'precio' => $d->precio
+                ];
+            });
+
+            // ✅ RESPUESTA COMPLETA (CLAVE)
             if ($request->expectsJson()) {
                 return response()->json([
                     'success' => true,
-                    'venta_id' => $venta->id
+                    'venta' => [
+                        'id' => $venta->id,
+                        'total' => $venta->total,
+                        'impuesto' => $venta->impuesto,
+                        'created_at' => $venta->created_at,
+                        'detalles' => $detalles
+                    ]
                 ]);
             }
 
@@ -110,7 +127,8 @@ class VentaController extends Controller
 
             if ($request->expectsJson()) {
                 return response()->json([
-                    'error' => $e->getMessage()
+                    'success' => false,
+                    'message' => $e->getMessage()
                 ], 500);
             }
 
