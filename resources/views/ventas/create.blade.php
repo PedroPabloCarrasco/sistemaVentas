@@ -461,17 +461,17 @@
             <div class="boleta-divider"></div>
 
             ${venta.detalles.map(d => `
-                            <div class="boleta-item">
+                                        <div class="boleta-item">
 
-                                <div class="item-nombre">${d.producto}</div>
+                                            <div class="item-nombre">${d.producto}</div>
 
-                                <div class="boleta-row">
-                                    <span>${d.cantidad} x $${clp(d.precio)}</span>
-                                    <span>$${clp(d.cantidad * d.precio)}</span>
-                                </div>
+                                            <div class="boleta-row">
+                                                <span>${d.cantidad} x $${clp(d.precio)}</span>
+                                                <span>$${clp(d.cantidad * d.precio)}</span>
+                                            </div>
 
-                            </div>
-                        `).join('')}
+                                        </div>
+                                    `).join('')}
 
         </div>
 
