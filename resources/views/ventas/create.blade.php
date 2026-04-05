@@ -20,6 +20,12 @@
 
                         <div class="col-md-6">
                             <label class="form-label">Producto</label>
+
+                            <!-- 🔍 BUSCADOR -->
+                            <input type="text" id="buscadorProducto" class="form-control mb-2"
+                                placeholder="🔍 Buscar producto..." onkeyup="filtrarProductos()">
+
+                            <!-- SELECT -->
                             <select id="producto" class="form-select">
                                 @foreach ($productos as $producto)
                                     <option value="{{ $producto->id }}" data-precio="{{ $producto->precio }}"
@@ -30,6 +36,8 @@
                                 @endforeach
                             </select>
                         </div>
+
+
 
                         <div class="col-md-3">
                             <label class="form-label">Cantidad</label>
@@ -288,6 +296,34 @@
 
 @push('js')
     <script>
+        function filtrarProductos() {
+            let input = document.getElementById('buscadorProducto').value.toLowerCase();
+            let select = document.getElementById('producto');
+            let options = select.options;
+
+            let firstVisibleIndex = -1;
+
+            for (let i = 0; i < options.length; i++) {
+                let texto = options[i].text.toLowerCase();
+
+                if (texto.includes(input)) {
+                    options[i].style.display = '';
+                    if (firstVisibleIndex === -1) {
+                        firstVisibleIndex = i;
+                    }
+                } else {
+                    options[i].style.display = 'none';
+                }
+            }
+
+            // 👉 Seleccionar automáticamente el primer resultado visible
+            if (firstVisibleIndex !== -1) {
+                select.selectedIndex = firstVisibleIndex;
+            }
+        }
+
+
+
         let productos = [];
 
         function clp(n) {
@@ -461,17 +497,17 @@
     <div class="boleta-divider"></div>
 
     ${venta.detalles.map(d => `
-            <div class="boleta-item">
+                                    <div class="boleta-item">
 
-                <div class="item-nombre">${d.producto}</div>
+                                        <div class="item-nombre">${d.producto}</div>
 
-                <div class="boleta-row">
-                    <span>${d.cantidad} x $${clp(d.precio)}</span>
-                    <span>$${clp(d.cantidad * d.precio)}</span>
-                </div>
+                                        <div class="boleta-row">
+                                            <span>${d.cantidad} x $${clp(d.precio)}</span>
+                                            <span>$${clp(d.cantidad * d.precio)}</span>
+                                        </div>
 
-            </div>
-        `).join('')}
+                                    </div>
+                                `).join('')}
 
     <div class="boleta-divider"></div>
 
