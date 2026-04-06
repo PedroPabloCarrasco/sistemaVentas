@@ -15,7 +15,8 @@ class Producto extends Model
         'precio',
         'stock',
         'categoria_id',
-        'estado'
+        'estado',
+        'codigo_barra'
     ];
 
     //  RELACIÓN CORRECTA

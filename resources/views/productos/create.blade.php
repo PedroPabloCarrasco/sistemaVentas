@@ -43,6 +43,13 @@
                             <input type="text" name="nombre" class="form-control" value="{{ old('nombre') }}" required>
                         </div>
 
+                        <!-- Código de Barra -->
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Código de Barra</label>
+                            <input type="text" name="codigo_barra" class="form-control" value="{{ old('codigo_barra') }}"
+                                required>
+                        </div>
+
                         <!-- Precio -->
                         <div class="col-md-3 mb-3">
                             <label class="form-label">Precio</label>

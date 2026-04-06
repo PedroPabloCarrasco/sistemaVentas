@@ -25,6 +25,8 @@
 
             <table class="w-full border border-gray-300 rounded-lg">
                 <tbody>
+
+                    <!-- Nombre -->
                     <tr class="bg-gray-50">
                         <td class="p-3 font-medium text-gray-700">Nombre:</td>
                         <td class="p-3">
@@ -34,7 +36,18 @@
                         </td>
                     </tr>
 
+                    <!-- Código de Barra -->
                     <tr class="bg-white">
+                        <td class="p-3 font-medium text-gray-700">Código de Barra:</td>
+                        <td class="p-3">
+                            <input type="text" name="codigo_barra" id="codigo_barra"
+                                value="{{ old('codigo_barra', $producto->codigo_barra) }}" required
+                                class="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        </td>
+                    </tr>
+
+                    <!-- Precio -->
+                    <tr class="bg-gray-50">
                         <td class="p-3 font-medium text-gray-700">Precio:</td>
                         <td class="p-3">
                             <input type="text" name="precio" id="precio"
@@ -44,7 +57,8 @@
                         </td>
                     </tr>
 
-                    <tr class="bg-gray-50">
+                    <!-- Stock -->
+                    <tr class="bg-white">
                         <td class="p-3 font-medium text-gray-700">Stock:</td>
                         <td class="p-3">
                             <input type="text" name="stock" id="stock"
@@ -54,7 +68,8 @@
                         </td>
                     </tr>
 
-                    <tr class="bg-white">
+                    <!-- Categoría -->
+                    <tr class="bg-gray-50">
                         <td class="p-3 font-medium text-gray-700">Categoría:</td>
                         <td class="p-3">
                             <select name="categoria_id" id="categoria_id" required
@@ -68,19 +83,24 @@
                             </select>
                         </td>
                     </tr>
+
                 </tbody>
             </table>
 
             <!-- Botones -->
             <div class="flex justify-end gap-3 mt-6">
-                <a href="{{ route('productos.index') }}"
-                    class="px-5 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition font-medium">
+
+                <!-- Cancelar -->
+                <!-- Cancelar -->
+                <a href="{{ route('productos.index') }}" class="btn btn-secondary">
                     Cancelar
                 </a>
-                <button type="submit"
-                    class="px-5 py-2 bg-yellow-400 text-white rounded hover:bg-yellow-500 transition font-semibold">
+
+                <!-- Actualizar -->
+                <button type="submit" class="btn btn-primary">
                     Actualizar
                 </button>
+
             </div>
         </form>
     </div>

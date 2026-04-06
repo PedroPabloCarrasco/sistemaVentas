@@ -85,9 +85,9 @@
 @section('content')
     <div class="container-fluid px-4">
 
-        <div class="d-flex justify-content-between align-items-center mt-4 mb-4">
-            <h2 class="fw-bold">Dashboard 📊</h2>
-            <button onclick="toggleDark()" class="btn btn-dark">🌙</button>
+        <!-- <div class="d-flex justify-content-between align-items-center mt-4 mb-4">
+                <h2 class="fw-bold">Dashboard 📊</h2>
+                <button onclick="toggleDark()" class="btn btn-dark">🌙</button>
         </div>
 
         <!-- MÉTRICAS -->
@@ -263,7 +263,8 @@
             </div>
         </div>
 
-    </div>
+    </div> -->
+
 @endsection
 
 @push('js')

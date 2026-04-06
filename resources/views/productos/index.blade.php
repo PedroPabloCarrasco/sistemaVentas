@@ -270,6 +270,7 @@
                         <tr>
                             <th>ID</th>
                             <th>Nombre</th>
+                            <th>Código</th> <!-- ✅ NUEVO -->
                             <th>Precio</th>
                             <th>Stock</th>
                             <th>Categoría</th>
@@ -283,6 +284,14 @@
                             <tr>
                                 <td>{{ $producto->id }}</td>
                                 <td>{{ $producto->nombre }}</td>
+
+                                <!-- ✅ NUEVO -->
+                                <td>
+                                    <span class="badge bg-dark">
+                                        {{ $producto->codigo_barra }}
+                                    </span>
+                                </td>
+
                                 <td>${{ $producto->precio }}</td>
                                 <td>{{ $producto->stock }}</td>
                                 <td>{{ $producto->categoria->nombre ?? '-' }}</td>
@@ -311,7 +320,6 @@
                             </tr>
                         @endforeach
                     </tbody>
-
                 </table>
 
             </div>

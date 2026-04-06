@@ -38,9 +38,18 @@ class ProductoController extends Controller
             'precio' => 'required|numeric',
             'stock' => 'required|integer',
             'categoria_id' => 'required|exists:categorias,id',
+            'codigo_barra' => 'required|string|max:255|unique:productos,codigo_barra',
         ]);
 
-        Producto::create($request->all());
+        Producto::create($request->only([
+            'nombre',
+            'precio',
+            'stock',
+            'descripcion',
+            'categoria_id',
+            'estado',
+            'codigo_barra'
+        ]));
 
         return redirect()->route('productos.index')
             ->with('success', 'Producto creado correctamente');
@@ -70,16 +79,25 @@ class ProductoController extends Controller
      */
     public function update(Request $request, string $id)
     {
+        $producto = Producto::findOrFail($id);
+
         $request->validate([
             'nombre' => 'required|string|max:255',
             'precio' => 'required|numeric',
             'stock' => 'required|integer',
             'categoria_id' => 'required|exists:categorias,id',
+            'codigo_barra' => 'required|string|max:255|unique:productos,codigo_barra,' . $producto->id,
         ]);
 
-        $producto = Producto::findOrFail($id);
-
-        $producto->update($request->all());
+        $producto->update($request->only([
+            'nombre',
+            'precio',
+            'stock',
+            'descripcion',
+            'categoria_id',
+            'estado',
+            'codigo_barra'
+        ]));
 
         return redirect()->route('productos.index')
             ->with('success', 'Producto actualizado correctamente');
