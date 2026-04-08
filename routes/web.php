@@ -11,25 +11,21 @@ use App\Http\Controllers\DashboardController;
 
 /*
 |--------------------------------------------------------------------------
-| RUTAS PRINCIPALES
+| RUTA PRINCIPAL (DASHBOARD)
 |--------------------------------------------------------------------------
 */
 
-Route::get('/', function () {
-    return view('template');
-});
+Route::get('/', [DashboardController::class, 'index'])->name('panel');
+
+/*
+|--------------------------------------------------------------------------
+| LOGIN
+|--------------------------------------------------------------------------
+*/
 
 Route::get('/login', function () {
     return view('auth.login');
 })->name('login');
-
-/*
-|--------------------------------------------------------------------------
-| DASHBOARD (CLAVE)
-|--------------------------------------------------------------------------
-*/
-
-Route::get('/panel', [DashboardController::class, 'index'])->name('panel');
 
 /*
 |--------------------------------------------------------------------------
@@ -48,6 +44,28 @@ Route::resource('ventas', VentaController::class);
 */
 
 Route::get('/barcode', [BarcodeController::class, 'index'])->name('barcode.index');
+
+/*
+|--------------------------------------------------------------------------
+| API
+|--------------------------------------------------------------------------
+*/
+
+Route::get('/api/producto/{codigo}', function ($codigo) {
+    return \App\Models\Producto::where('codigo', $codigo)->first();
+});
+
+Route::get('/api/clientes', function () {
+    return \App\Models\Cliente::all();
+});
+
+/*
+|--------------------------------------------------------------------------
+| TICKET
+|--------------------------------------------------------------------------
+*/
+
+Route::get('/ventas/{id}/ticket', [VentaController::class, 'ticket'])->name('ventas.ticket');
 
 /*
 |--------------------------------------------------------------------------
@@ -72,15 +90,3 @@ Route::post('/logout', function () {
 
     return redirect('/login');
 })->name('logout');
-
-
-Route::get('/api/producto/{codigo}', function ($codigo) {
-    return \App\Models\Producto::where('codigo', $codigo)->first();
-});
-
-Route::get('/ventas/{id}/ticket', [VentaController::class, 'ticket'])->name('ventas.ticket');
-Route::get('/api/clientes', function () {
-    return \App\Models\Cliente::all();
-});
-
-Route::resource('ventas', VentaController::class);

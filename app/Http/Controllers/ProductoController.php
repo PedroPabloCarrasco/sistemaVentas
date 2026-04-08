@@ -35,21 +35,24 @@ class ProductoController extends Controller
     {
         $request->validate([
             'nombre' => 'required|string|max:255',
-            'precio' => 'required|numeric',
-            'stock' => 'required|integer',
+            'precio' => 'required|numeric|min:0',
+            'stock' => 'required|integer|min:0',
             'categoria_id' => 'required|exists:categorias,id',
             'codigo_barra' => 'required|string|max:255|unique:productos,codigo_barra',
         ]);
 
-        Producto::create($request->only([
-            'nombre',
-            'precio',
-            'stock',
-            'descripcion',
-            'categoria_id',
-            'estado',
-            'codigo_barra'
-        ]));
+        // ✅ Estado automático (INT)
+        $estado = $request->stock > 0 ? 1 : 0;
+
+        Producto::create([
+            'nombre' => $request->nombre,
+            'precio' => $request->precio,
+            'stock' => $request->stock,
+            'descripcion' => $request->descripcion,
+            'categoria_id' => $request->categoria_id,
+            'estado' => $estado,
+            'codigo_barra' => $request->codigo_barra
+        ]);
 
         return redirect()->route('productos.index')
             ->with('success', 'Producto creado correctamente');
@@ -71,6 +74,7 @@ class ProductoController extends Controller
     public function edit(Producto $producto)
     {
         $categorias = Categoria::all();
+
         return view('productos.edit', compact('producto', 'categorias'));
     }
 
@@ -83,21 +87,24 @@ class ProductoController extends Controller
 
         $request->validate([
             'nombre' => 'required|string|max:255',
-            'precio' => 'required|numeric',
-            'stock' => 'required|integer',
+            'precio' => 'required|numeric|min:0',
+            'stock' => 'required|integer|min:0',
             'categoria_id' => 'required|exists:categorias,id',
             'codigo_barra' => 'required|string|max:255|unique:productos,codigo_barra,' . $producto->id,
         ]);
 
-        $producto->update($request->only([
-            'nombre',
-            'precio',
-            'stock',
-            'descripcion',
-            'categoria_id',
-            'estado',
-            'codigo_barra'
-        ]));
+        // ✅ Estado automático (INT) — CORREGIDO
+        $estado = $request->stock > 0 ? 1 : 0;
+
+        $producto->update([
+            'nombre' => $request->nombre,
+            'precio' => $request->precio,
+            'stock' => $request->stock,
+            'descripcion' => $request->descripcion,
+            'categoria_id' => $request->categoria_id,
+            'estado' => $estado,
+            'codigo_barra' => $request->codigo_barra
+        ]);
 
         return redirect()->route('productos.index')
             ->with('success', 'Producto actualizado correctamente');

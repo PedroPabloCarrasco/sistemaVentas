@@ -13,9 +13,16 @@
     <!-- Buscador -->
     <form class="d-none d-md-inline-block form-inline ms-auto me-3 my-2 my-md-0">
         <div class="input-group">
-            <input class="form-control" type="text" placeholder="Buscar..." />
-            <button class="btn btn-primary" type="button">
-                <i class="fas fa-search"></i>
+
+            <span>
+                <div class=" text-white text-center">
+
+                    <h2 class="m-0 fw-bold">Vitaco Ventas</h2>
+
+                </div>
+            </span>
+
+
             </button>
         </div>
     </form>
@@ -29,7 +36,7 @@
 
                 <i class="fas fa-user fa-fw"></i>
 
-                {{-- 👇 Nombre del usuario --}}
+                {{--  Nombre del usuario --}}
                 <span>{{ auth()->user()->name ?? 'Usuario' }}</span>
             </a>
 

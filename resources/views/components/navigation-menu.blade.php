@@ -76,7 +76,7 @@
                     </nav>
                 </div>
 
-                <!-- NUEVO: CÓDIGO DE BARRAS -->
+                <!-- NUEVO: CÓDIGO DE BARRAS
                 <a class="nav-link {{ request()->routeIs('barcode.*') ? 'active' : '' }}"
                     href="{{ route('barcode.index') }}">
                     <div class="sb-nav-link-icon">
@@ -84,6 +84,7 @@
                     </div>
                     Leer Código de Barra
                 </a>
+                -->
 
             </div>
         </div>

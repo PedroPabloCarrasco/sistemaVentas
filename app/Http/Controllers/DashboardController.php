@@ -33,8 +33,11 @@ class DashboardController extends Controller
         // Ventas del mes
         $ventasMes = Venta::where('fecha_hora', '>=', $inicioMes)->count();
 
-        // Productos activos
-        $productosActivos = Producto::count();
+        // ✅ SOLO PRODUCTOS ACTIVOS
+        $productosActivos = Producto::where('estado', 1)->count();
+
+        // 🔥 OPCIONAL (pro)
+        $productosInactivos = Producto::where('estado', 0)->count();
 
         // Clientes
         $clientes = User::count();
@@ -110,6 +113,7 @@ class DashboardController extends Controller
             'ingresosTotales',
             'ventasMes',
             'productosActivos',
+            'productosInactivos', // 👈 opcional
             'clientes',
             'ventasPorDia',
             'productosRecientes',
