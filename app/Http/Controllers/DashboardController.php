@@ -14,8 +14,14 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        // Fechas
-        $hoy = Carbon::today();
+        /*
+        |--------------------------------------------------------------------------
+        | FECHAS (AJUSTADAS A CHILE)
+        |--------------------------------------------------------------------------
+        */
+
+        $inicioDia = Carbon::now()->startOfDay();
+        $finDia = Carbon::now()->endOfDay();
         $inicioMes = Carbon::now()->startOfMonth();
 
         /*
@@ -24,23 +30,29 @@ class DashboardController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        // Ingresos del día
-        $ingresosHoy = Venta::whereDate('fecha_hora', $hoy)->sum('total') ?? 0;
+        // ✅ Ingresos del día (SOLUCIÓN DEFINITIVA)
+        $ingresosHoy = Venta::whereBetween('fecha_hora', [
+            $inicioDia,
+            $finDia
+        ])->sum('total') ?? 0;
 
-        // Ingresos totales
+        // ✅ Ingresos totales
         $ingresosTotales = Venta::sum('total') ?? 0;
 
-        // Ventas del mes
+        // ✅ Ventas del mes (cantidad)
         $ventasMes = Venta::where('fecha_hora', '>=', $inicioMes)->count();
 
-        // ✅ SOLO PRODUCTOS ACTIVOS
+        // ✅ Productos activos (estado = 1)
         $productosActivos = Producto::where('estado', 1)->count();
 
-        // 🔥 OPCIONAL (pro)
+        // ✅ Productos inactivos
         $productosInactivos = Producto::where('estado', 0)->count();
 
-        // Clientes
+        // ✅ Clientes
         $clientes = User::count();
+
+        // ✅ Stock bajo (cantidad directa para la card)
+        $stockBajo = Producto::where('stock', '<', 5)->count();
 
         /*
         |--------------------------------------------------------------------------
@@ -63,9 +75,7 @@ class DashboardController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        $productosRecientes = Producto::latest()
-            ->take(5)
-            ->get();
+        $productosRecientes = Producto::latest()->take(5)->get();
 
         /*
         |--------------------------------------------------------------------------
@@ -74,7 +84,7 @@ class DashboardController extends Controller
         */
 
         $ultimasOrdenes = Venta::with('detalles.producto')
-            ->orderBy('id', 'desc')
+            ->latest()
             ->take(5)
             ->get();
 
@@ -96,7 +106,7 @@ class DashboardController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | PRODUCTOS CON STOCK BAJO
+        | PRODUCTOS CON STOCK BAJO (LISTA)
         |--------------------------------------------------------------------------
         */
 
@@ -104,7 +114,7 @@ class DashboardController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | RETORNO A LA VISTA
+        | RETORNO
         |--------------------------------------------------------------------------
         */
 
@@ -113,8 +123,9 @@ class DashboardController extends Controller
             'ingresosTotales',
             'ventasMes',
             'productosActivos',
-            'productosInactivos', // 👈 opcional
+            'productosInactivos',
             'clientes',
+            'stockBajo', // 👈 clave para tu card
             'ventasPorDia',
             'productosRecientes',
             'ultimasOrdenes',

@@ -14,13 +14,14 @@
         <!-- CARDS RESUMEN -->
         <div class="row">
 
-            <!-- Ventas -->
+            <!-- Ingresos Hoy -->
             <div class="col-xl-3 col-md-6 mb-4">
                 <div class="card bg-primary text-white rounded-4 shadow-sm p-3">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <h6 class="text-uppercase">Ventas Hoy</h6>
-                            <h3>$ {{ number_format($ingresosHoy, 0, ',', '.') }}</h3>
+                            <h6 class="text-uppercase">Ingresos Hoy</h6>
+                            <h3>$ {{ number_format($ingresosHoy ?? 0, 0, ',', '.') }}</h3>
+
                         </div>
                         <i class="fas fa-cash-register fa-2x"></i>
                     </div>
@@ -33,7 +34,7 @@
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
                             <h6 class="text-uppercase">Productos</h6>
-                            <h3>{{ $productosActivos }}</h3>
+                            <h3>{{ $productosActivos ?? 0 }}</h3>
                         </div>
                         <i class="fas fa-box fa-2x"></i>
                     </div>
@@ -53,13 +54,13 @@
                 </div>
             </div>
 
-            <!-- Ventas totales -->
+            <!-- Ingresos Totales -->
             <div class="col-xl-3 col-md-6 mb-4">
                 <div class="card bg-dark text-white rounded-4 shadow-sm p-3">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <h6 class="text-uppercase">Total Ventas</h6>
-                            <h3>$ {{ $totalVentas ?? 0 }}</h3>
+                            <h6 class="text-uppercase">Ingresos Totales</h6>
+                            <h3>$ {{ number_format($ingresosTotales ?? 0, 0, ',', '.') }}</h3>
                         </div>
                         <i class="fas fa-chart-line fa-2x"></i>
                     </div>
