@@ -90,3 +90,11 @@ Route::post('/logout', function () {
 
     return redirect('/login');
 })->name('logout');
+
+
+Route::post('/cierre-mensual', [VentaController::class, 'cierreMensual'])
+    ->name('ventas.cierre');
+
+
+Route::get('/cierres', [VentaController::class, 'historialCierres'])
+    ->name('cierres.index');

@@ -6,8 +6,10 @@ use Illuminate\Http\Request;
 use App\Models\Venta;
 use App\Models\DetalleVenta;
 use App\Models\Producto;
+use App\Models\CierreMensual;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+
 
 class VentaController extends Controller
 {
@@ -163,5 +165,51 @@ class VentaController extends Controller
         } catch (\Exception $e) {
             return back()->with('error', 'Error al eliminar la venta: ' . $e->getMessage());
         }
+    }
+
+
+
+    public function cierreMensual()
+    {
+        $mes = now()->month;
+        $anio = now()->year;
+
+        // 🔒 evitar duplicados
+        $existe = CierreMensual::where('mes', $mes)
+            ->where('anio', $anio)
+            ->exists();
+
+        if ($existe) {
+            return back()->with('error', 'Este mes ya fue cerrado');
+        }
+
+        // 📊 calcular datos
+        $ventas = Venta::whereMonth('created_at', $mes)
+            ->whereYear('created_at', $anio)
+            ->get();
+
+        $totalVentas = $ventas->sum('total');
+        $totalImpuesto = $ventas->sum('impuesto');
+        $cantidadVentas = $ventas->count();
+
+        // 💾 guardar cierre
+        CierreMensual::create([
+            'mes' => $mes,
+            'anio' => $anio,
+            'total_ventas' => $totalVentas,
+            'total_impuesto' => $totalImpuesto,
+            'cantidad_ventas' => $cantidadVentas
+        ]);
+
+        return back()->with('success', 'Cierre mensual realizado correctamente');
+    }
+
+    public function historialCierres()
+    {
+        $cierres = CierreMensual::orderBy('anio', 'desc')
+            ->orderBy('mes', 'desc')
+            ->get();
+
+        return view('cierres.index', compact('cierres'));
     }
 }

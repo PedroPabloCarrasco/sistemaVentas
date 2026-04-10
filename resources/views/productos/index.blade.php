@@ -292,7 +292,7 @@
                                     </span>
                                 </td>
 
-                                <td>${{ $producto->precio }}</td>
+                                <td>${{ number_format($producto->precio, 0, ',', '.') }}</td>
                                 <td>{{ $producto->stock }}</td>
                                 <td>{{ $producto->categoria->nombre ?? '-' }}</td>
                                 <td>

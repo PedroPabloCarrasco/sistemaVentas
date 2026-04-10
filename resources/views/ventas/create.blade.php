@@ -327,7 +327,10 @@
         let productos = [];
 
         function clp(n) {
-            return Math.round(Number(n)).toLocaleString('es-CL');
+            return new Intl.NumberFormat('es-CL', {
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            }).format(n);
         }
 
         function agregarProducto() {
@@ -497,17 +500,17 @@
     <div class="boleta-divider"></div>
 
     ${venta.detalles.map(d => `
-                                    <div class="boleta-item">
+                                                <div class="boleta-item">
 
-                                        <div class="item-nombre">${d.producto}</div>
+                                                    <div class="item-nombre">${d.producto}</div>
 
-                                        <div class="boleta-row">
-                                            <span>${d.cantidad} x $${clp(d.precio)}</span>
-                                            <span>$${clp(d.cantidad * d.precio)}</span>
-                                        </div>
+                                                    <div class="boleta-row">
+                                                        <span>${d.cantidad} x $${clp(d.precio)}</span>
+                                                        <span>$${clp(d.cantidad * d.precio)}</span>
+                                                    </div>
 
-                                    </div>
-                                `).join('')}
+                                                </div>
+                                            `).join('')}
 
     <div class="boleta-divider"></div>
 

@@ -12,6 +12,13 @@
             Nueva Venta
         </a>
 
+        <form action="{{ route('ventas.cierre') }}" method="POST" class="mb-3">
+            @csrf
+            <button class="btn btn-warning" onclick="return confirm('¿Seguro que quieres cerrar el mes actual?')">
+                📊 Cerrar Mes
+            </button>
+        </form>
+
         <table class="table table-bordered">
             <thead>
                 <tr>
